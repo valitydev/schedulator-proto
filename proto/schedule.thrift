@@ -7,33 +7,51 @@ namespace erlang com.rbkmoney.damsel.schedule
 
 typedef string URL
 
-struct ScheduledJobContext {
+struct RegisterJobRequest {
     // путь до сервиса, который будет исполнять Job
     1: required URL executor_service_path
 
-    // ссылка на расписание в Dominant-е. Можно оставить не ссылку, а полноценное расписание?
-    // Или вынести в отдельную структуру, чтобы можно было задавать и так и так
-    2: required domain.BusinessScheduleRef business_schedule_ref
+    2: required Schedule schedule
 
-    // ссылка на календарь в Dominant-е. Можно также оставить полноценный календарь? Пока что хз
-    3: required domain.CalendarRef calendar_ref
+    3: required GenericServiceExecutionContext context
+}
 
-    4: required GenericServiceExecutionContext context
+union Schedule {
+    1: DominantBasedSchedule dominant_schedule
+}
+
+struct DominantBasedSchedule {
+    1: required domain.BusinessScheduleRef business_schedule_ref
+    2: required domain.CalendarRef calendar_ref
+    3: optional domain.DataRevision revision
 }
 
 /**
  * Общий контекст выполнения какого-то абстрактного сервиса
  * Можно дополнять различными сервисами, которые должны выполнять Job-ы по расписанию
  **/
-union GenericServiceExecutionContext {
+struct GenericServiceExecutionContext {
+    1: ScheduledJobContext scheduled_job_context
+    2: ServiceExecutionContext service_context
+}
+
+/**
+ * Типизированный контекст для разных сервисов
+ **/
+union ServiceExecutionContext {
     1: PayouterExecutionContext payouter_context
 }
 
 /** Конкретные контексты выполнения сервисов, чтобы выполняющий сервис знал, какую именно операцию ему совершать */
 union PayouterExecutionContext {
-    1: payout_processing.GeneratePayoutParams context
+    1: payout_processing.GeneratePayoutParams generate_payout_context // whatever you like context
 }
 
+struct ScheduledJobContext {
+    1: required base.Timestamp next_fire_time
+    2: required base.Timestamp prev_fire_time
+    3: required base.Timestamp next_cron_time
+}
 
 union ContextValidationResponse {
     1: required list<string> errors
@@ -80,7 +98,7 @@ exception BadContextProvided {
 **/
 service Schedulator {
 
-    void RegisterJob(1: base.ID schedule_id, 2: ScheduledJobContext context)
+    void RegisterJob(1: base.ID schedule_id, 2: RegisterJobRequest context)
         throws (1: ScheduleAlreadyExists schedule_already_exists_ex, 2: BadContextProvided bad_context_provided_ex)
 
     void DeregisterJob(1: base.ID schedule_id)
