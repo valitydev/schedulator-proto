@@ -16,6 +16,11 @@ struct RegisterJobRequest {
     3: required GenericServiceExecutionContext context
 }
 
+struct ExecuteJobRequest {
+    1: required ScheduledJobContext scheduled_job_context
+    2: required GenericServiceExecutionContext service_execution_context
+}
+
 union Schedule {
     1: DominantBasedSchedule dominant_schedule
 }
@@ -30,15 +35,7 @@ struct DominantBasedSchedule {
  * Общий контекст выполнения какого-то абстрактного сервиса
  * Можно дополнять различными сервисами, которые должны выполнять Job-ы по расписанию
  **/
-struct GenericServiceExecutionContext {
-    1: ScheduledJobContext scheduled_job_context
-    2: ServiceExecutionContext service_context
-}
-
-/**
- * Типизированный контекст для разных сервисов
- **/
-union ServiceExecutionContext {
+union GenericServiceExecutionContext {
     1: PayouterExecutionContext payouter_context
 }
 
@@ -55,33 +52,6 @@ struct ScheduledJobContext {
 
 union ContextValidationResponse {
     1: required list<string> errors
-}
-
-union JobExecutionResponse {
-    1: SuccessfulExecution success
-    2: FailedExecution fail
-}
-
-struct SuccessfulExecution {}
-
-struct FailedExecution {
-    1: optional string reason
-    2: optional RetryPolicy retry_policy
-}
-
-union RetryPolicy {
-    1: RetryNow retry_now
-    2: RetryLater retry_later
-    3: RetryNever retry_never
-}
-
-struct RetryNow {}
-struct RetryLater {
-    1: optional base.TimeSpan delay
-}
-union RetryNever {
-    1: DeregisterJob deregister // Этим способом можно сказать, что Job больше не актуален.
-    2: RemainJob remain
 }
 
 struct DeregisterJob {}
@@ -113,6 +83,6 @@ service ScheduledJobExecutor {
     /** метод вызывается при попытке зарегистрировать Job */
     ContextValidationResponse ValidateExecutionContext(1: GenericServiceExecutionContext context)
 
-    JobExecutionResponse ExecuteJob(1: GenericServiceExecutionContext context)
+    void ExecuteJob(1: ExecuteJobRequest request)
 
 }
