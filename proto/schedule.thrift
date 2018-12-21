@@ -83,6 +83,6 @@ service ScheduledJobExecutor {
     /** метод вызывается при попытке зарегистрировать Job */
     ContextValidationResponse ValidateExecutionContext(1: GenericServiceExecutionContext context)
 
-    void ExecuteJob(1: ExecuteJobRequest request)
+    GenericServiceExecutionContext ExecuteJob(1: ExecuteJobRequest request)
 
 }
