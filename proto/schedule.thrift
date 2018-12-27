@@ -7,6 +7,8 @@ namespace erlang com.rbkmoney.damsel.schedule
 
 typedef string URL
 
+typedef base.Opaque GenericServiceExecutionContext
+
 struct RegisterJobRequest {
     // путь до сервиса, который будет исполнять Job
     1: required URL executor_service_path
@@ -29,19 +31,6 @@ struct DominantBasedSchedule {
     1: required domain.BusinessScheduleRef business_schedule_ref
     2: required domain.CalendarRef calendar_ref
     3: optional domain.DataRevision revision
-}
-
-/**
- * Общий контекст выполнения какого-то абстрактного сервиса
- * Можно дополнять различными сервисами, которые должны выполнять Job-ы по расписанию
- **/
-union GenericServiceExecutionContext {
-    1: PayouterExecutionContext payouter_context
-}
-
-/** Конкретные контексты выполнения сервисов, чтобы выполняющий сервис знал, какую именно операцию ему совершать */
-union PayouterExecutionContext {
-    1: payout_processing.GeneratePayoutParams generate_payout_context // whatever you like context
 }
 
 struct ScheduledJobContext {
