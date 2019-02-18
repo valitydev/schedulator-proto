@@ -46,7 +46,7 @@ union ContextValidationResponse {
 struct DeregisterJob {}
 struct RemainJob {}
 
-exception NotFoundSchedule {}
+exception ScheduleNotFound {}
 exception ScheduleAlreadyExists {}
 exception BadContextProvided {
     1: required ContextValidationResponse validation_response
@@ -57,11 +57,11 @@ exception BadContextProvided {
 **/
 service Schedulator {
 
-    void RegisterJob(1: base.ID schedule_id, 2: RegisterJobRequest context)
+    void RegisterJob(1: base.ID schedule_id, 2: RegisterJobRequest request)
         throws (1: ScheduleAlreadyExists schedule_already_exists_ex, 2: BadContextProvided bad_context_provided_ex)
 
     void DeregisterJob(1: base.ID schedule_id)
-        throws (1: NotFoundSchedule ex)
+        throws (1: ScheduleNotFound ex)
 }
 
 /**
