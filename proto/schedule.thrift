@@ -6,15 +6,14 @@ namespace java com.rbkmoney.damsel.schedule
 namespace erlang com.rbkmoney.damsel.schedule
 
 typedef string URL
+typedef base.ID ScheduleID
 
 typedef base.Opaque GenericServiceExecutionContext
 
 struct RegisterJobRequest {
     // путь до сервиса, который будет исполнять Job
     1: required URL executor_service_path
-
     2: required Schedule schedule
-
     3: required GenericServiceExecutionContext context
 }
 
@@ -40,16 +39,46 @@ struct ScheduledJobContext {
 }
 
 union ContextValidationResponse {
-    1: required list<string> errors
+    1: optional list<string> errors
 }
 
 struct DeregisterJob {}
-struct RemainJob {}
 
+exception NoLastEvent {}
+exception EventNotFound {}
 exception ScheduleNotFound {}
 exception ScheduleAlreadyExists {}
 exception BadContextProvided {
     1: required ContextValidationResponse validation_response
+}
+
+struct ScheduleJobRegistered {
+    1: required ScheduleID schedule_id
+    2: required URL executor_service_path
+    3: required GenericServiceExecutionContext context
+    4: required Schedule schedule
+}
+
+struct ScheduleJobExecuted {
+    1: required ExecuteJobRequest request
+    2: required GenericServiceExecutionContext response
+}
+
+struct ScheduleContextValidated {
+    1: required GenericServiceExecutionContext request
+    2: required ContextValidationResponse response
+}
+
+struct ScheduleJobDeregistered {}
+
+/**
+ * Один из возможных вариантов события, порождённого расписания
+ */
+union ScheduleChange {
+    1: ScheduleJobRegistered        schedule_job_registered
+    2: ScheduleContextValidated     schedule_context_validated
+    3: ScheduleJobExecuted          schedule_job_executed
+    4: ScheduleJobDeregistered      schedule_job_deregistered
 }
 
 /**
@@ -57,10 +86,10 @@ exception BadContextProvided {
 **/
 service Schedulator {
 
-    void RegisterJob(1: base.ID schedule_id, 2: RegisterJobRequest request)
+    void RegisterJob(1: ScheduleID schedule_id, 2: RegisterJobRequest request)
         throws (1: ScheduleAlreadyExists schedule_already_exists_ex, 2: BadContextProvided bad_context_provided_ex)
 
-    void DeregisterJob(1: base.ID schedule_id)
+    void DeregisterJob(1: ScheduleID schedule_id)
         throws (1: ScheduleNotFound ex)
 }
 
