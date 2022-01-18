@@ -5,51 +5,88 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.rbkmoney</groupId>
-        <artifactId>parent</artifactId>
+        <groupId>dev.vality</groupId>
+        <artifactId>library-parent-pom</artifactId>
         <version>1.0.0</version>
     </parent>
 
     <artifactId>schedulator-proto</artifactId>
-    <version>SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>jar</packaging>
 
-
-    <name>Schedulator</name>
+    <name>payout-manager</name>
     <description>Generates jar artifact containing compiled thrift classes based on generated thrift IDL files
     </description>
+    <url>https://github.com/valitydev/schedulator-proto</url>
 
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <email>devs@vality.dev</email>
+            <organization>Vality</organization>
+            <organizationUrl>https://vality.dev</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/valitydev/schedulator-proto</connection>
+        <developerConnection>scm:git:ssh://github.com/valitydev/schedulator-proto</developerConnection>
+        <url>https://github.com/valitydev/schedulator-proto/tree/master</url>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <revision>SNAPSHOT</revision>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>com.rbkmoney.woody</groupId>
+            <groupId>dev.vality.woody</groupId>
             <artifactId>woody-thrift</artifactId>
-            <version>LATEST</version>
+            <version>1.0.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.rbkmoney</groupId>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.vality</groupId>
             <artifactId>damsel</artifactId>
-            <version>1.268-45c8524</version>
+            <version>1.538-5addc41</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
     <build>
         <finalName>${project.artifactId}</finalName>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/proto</directory>
+                <targetPath>${project.build.outputDirectory}/proto</targetPath>
+                <includes>
+                    <include>*.thrift</include>
+                </includes>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
         <plugins>
             <!-- THRIFT -->
             <plugin>
                 <groupId>org.apache.thrift</groupId>
                 <artifactId>thrift-maven-plugin</artifactId>
-                <version>0.9.3-1</version>
+                <version>0.10.0</version>
                 <configuration>
                     <generator>java:fullcamel</generator>
                     <thriftSourceRoot>${project.basedir}/proto</thriftSourceRoot>
-                    <thriftExecutable></thriftExecutable>
+                    <thriftExecutable>${path_to_thrift}</thriftExecutable>
                 </configuration>
                 <executions>
                     <execution>
@@ -64,7 +101,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.2.4</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -74,8 +111,8 @@
                         <configuration>
                             <relocations>
                                 <relocation>
-                                    <pattern>com.rbkmoney.damsel</pattern>
-                                    <shadedPattern>com.rbkmoney.damsel.v${commit.number}</shadedPattern>
+                                    <pattern>dev.vality.damsel</pattern>
+                                    <shadedPattern>dev.vality.damsel.v${commit.number}</shadedPattern>
                                 </relocation>
                             </relocations>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
