@@ -2,8 +2,8 @@ include "base.thrift"
 include "domain.thrift"
 include "payout_processing.thrift"
 
-namespace java com.rbkmoney.damsel.schedule
-namespace erlang com.rbkmoney.damsel.schedule
+namespace java dev.vality.damsel.schedule
+namespace erlang dev.vality.damsel.schedule
 
 typedef string URL
 typedef base.ID ScheduleID
